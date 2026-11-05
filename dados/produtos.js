@@ -2,10 +2,11 @@
 // Para atualizar: no Admin > Produtos, clique em "Baixar produtos.js"
 // e substitua este arquivo no repositório.
 // Sempre que este arquivo mudar, aumente a VERSAO para os navegadores recarregarem o catálogo.
-const PRODUTOS_VERSAO = 1;
+const PRODUTOS_VERSAO = 2;
 const PRODUTOS = [
-  { id: "coxinha", nome: "Coxinha", preco: 6, ativo: true },
-  { id: "pao-de-queijo", nome: "Pão de queijo", preco: 4, ativo: true },
-  { id: "refrigerante-lata", nome: "Refrigerante lata", preco: 5.5, ativo: true },
-  { id: "suco-natural", nome: "Suco natural", preco: 7, ativo: true }
+  {"id":"mw3uhn0khjtq","nome":"Pastel (Carne / Presunto e Mussarela / Verdura)","preco":10,"ativo":true},
+  {"id":"mw3uhtr8k3aw","nome":"Cachorro Quente","preco":8,"ativo":true},
+  {"id":"mw3ui7q9i2cs","nome":"Refrigerante 200ml (Coca ou Guarana)","preco":5,"ativo":true},
+  {"id":"mw3uidu85es1","nome":"Água","preco":3,"ativo":true},
+  {"id":"mw3uin3l2fmf","nome":"Bombom com 8 unidades","preco":10,"ativo":true}
 ];
