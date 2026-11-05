@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Caixa · cantina-jmj</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/tailwind-config.js"></script>
+  <link rel="icon" href="logo.png">
+  <style>
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  </style>
+</head>
+<body class="min-h-screen bg-jmj-light text-gray-800 pb-36 md:pb-0">
+  <header class="bg-jmj text-white sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+      <img src="logo.png" alt="" class="w-10 h-10 bg-white rounded-full p-0.5">
+      <span class="font-bold text-lg">cantina-jmj <span class="font-normal opacity-70">· Caixa</span></span>
+      <!-- Menu desktop -->
+      <nav class="ml-auto hidden md:flex gap-1">
+        <button data-tab="pdv" class="tab flex items-center gap-2 px-4 py-2 rounded-lg font-medium"><i data-icon="cart"></i>PDV</button>
+        <button data-tab="historico" class="tab flex items-center gap-2 px-4 py-2 rounded-lg font-medium"><i data-icon="history"></i>Histórico</button>
+        <a href="index.html" class="flex items-center gap-2 px-3 py-2 opacity-70 hover:opacity-100"><i data-icon="logout"></i>Sair</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-4">
+    <!-- PDV -->
+    <section id="pdv" class="tela">
+     <div class="md:grid md:grid-cols-3 md:items-start gap-4">
+      <div class="md:col-span-2">
+        <div class="relative mb-4">
+          <i data-icon="search" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input id="busca" type="search" placeholder="Buscar produto..."
+            class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-jmj">
+        </div>
+        <div id="gradeProdutos" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- Fundo escuro do carrinho no celular -->
+      <div id="fundoCarrinho" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden"></div>
+
+      <!-- Carrinho: painel lateral no desktop, gaveta inferior no celular -->
+      <aside id="painelCarrinho"
+        class="fixed inset-x-0 bottom-0 z-50 max-h-[85vh] overflow-y-auto rounded-t-3xl translate-y-full transition-transform duration-200
+               md:translate-y-0 md:max-h-none md:rounded-2xl md:sticky md:top-20 md:bottom-auto md:z-10
+               bg-white shadow-2xl md:shadow p-4 safe-bottom">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold text-jmj text-lg flex items-center gap-2"><i data-icon="cart"></i>Venda atual</h2>
+          <button id="fecharCarrinho" class="md:hidden p-2 -mr-2 text-gray-500"><i data-icon="x"></i></button>
+        </div>
+        <ul id="carrinho" class="divide-y mb-4"></ul>
+
+        <p class="text-sm font-medium text-gray-500 mb-2">Pagamento</p>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <button data-pag="pix" class="pag flex items-center justify-center gap-2 border-2 rounded-xl py-3 font-semibold"><i data-icon="pix"></i>PIX</button>
+          <button data-pag="dinheiro" class="pag flex items-center justify-center gap-2 border-2 rounded-xl py-3 font-semibold"><i data-icon="cash"></i>Dinheiro</button>
+        </div>
+
+        <!-- Troco (só para dinheiro) -->
+        <div id="boxTroco" class="hidden mb-3 bg-green-50 rounded-xl p-3">
+          <label class="block text-sm font-medium text-green-800 mb-1">Valor recebido (opcional)</label>
+          <input id="recebido" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00"
+            class="w-full px-3 py-2 rounded-lg border border-green-200 focus:outline-none focus:ring-2 focus:ring-green-600">
+          <p id="troco" class="text-sm font-semibold text-green-800 mt-2 h-5"></p>
+        </div>
+
+        <div class="flex justify-between items-center text-xl font-bold mb-4">
+          <span>Total</span><span id="total" class="text-jmj">R$ 0,00</span>
+        </div>
+        <button id="finalizar" class="w-full flex items-center justify-center gap-2 bg-jmj-red hover:bg-jmj-redDark disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition">
+          <i data-icon="check"></i>Finalizar venda
+        </button>
+        <button id="limpar" class="w-full flex items-center justify-center gap-1 mt-2 py-2 text-sm text-gray-500 hover:text-jmj-red"><i data-icon="trash" class="w-4 h-4"></i>Limpar</button>
+      </aside>
+     </div>
+    </section>
+
+    <!-- HISTÓRICO -->
+    <section id="historico" class="tela hidden">
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="bg-white rounded-2xl shadow p-3 sm:p-4"><p class="text-xs sm:text-sm text-gray-500">Hoje</p><p id="hQtd" class="text-lg sm:text-2xl font-bold text-jmj"></p></div>
+        <div class="bg-white rounded-2xl shadow p-3 sm:p-4"><p class="text-xs sm:text-sm text-gray-500 flex items-center gap-1"><i data-icon="pix" class="w-3.5 h-3.5 text-teal-600"></i>PIX</p><p id="hPix" class="text-lg sm:text-2xl font-bold text-jmj"></p></div>
+        <div class="bg-white rounded-2xl shadow p-3 sm:p-4"><p class="text-xs sm:text-sm text-gray-500 flex items-center gap-1"><i data-icon="cash" class="w-3.5 h-3.5 text-green-700"></i>Dinheiro</p><p id="hDinheiro" class="text-lg sm:text-2xl font-bold text-jmj"></p></div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow p-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <p class="text-sm text-gray-600 flex-1">No fim do dia, envie as vendas deste aparelho para o administrador juntar com as dos outros caixas.</p>
+        <button id="enviarVendas" class="flex items-center justify-center gap-2 bg-jmj hover:bg-jmj-dark text-white font-semibold px-5 py-3 rounded-xl transition whitespace-nowrap">
+          <i data-icon="share"></i>Enviar vendas
+        </button>
+      </div>
+
+      <!-- Lista em cartões (celular) e tabela (desktop) -->
+      <div id="listaHistorico" class="space-y-2 md:hidden"></div>
+      <div class="hidden md:block bg-white rounded-2xl shadow overflow-x-auto">
+        <table class="w-full text-left">
+          <thead class="bg-jmj text-white text-sm">
+            <tr><th class="p-3">Data/hora</th><th class="p-3">Itens</th><th class="p-3">Pagamento</th><th class="p-3 text-right">Total</th></tr>
+          </thead>
+          <tbody id="tabelaHistorico" class="divide-y"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Barra de resumo da venda (celular) -->
+  <button id="barraResumo" class="md:hidden fixed inset-x-3 bottom-[76px] z-30 bg-jmj-red text-white rounded-2xl shadow-lg px-4 py-3 flex items-center gap-3 hidden">
+    <span class="relative"><i data-icon="cart" class="w-6 h-6"></i><span id="resumoQtd" class="absolute -top-2 -right-2 bg-white text-jmj-red text-xs font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center"></span></span>
+    <span class="flex-1 text-left font-semibold">Ver venda</span>
+    <span id="resumoTotal" class="font-bold text-lg"></span>
+  </button>
+
+  <!-- Menu inferior (celular) -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 grid grid-cols-3 safe-bottom">
+    <button data-tab="pdv" class="tab-m flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium"><i data-icon="cart" class="w-6 h-6"></i>PDV</button>
+    <button data-tab="historico" class="tab-m flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium"><i data-icon="history" class="w-6 h-6"></i>Histórico</button>
+    <a href="index.html" class="flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium text-gray-500"><i data-icon="logout" class="w-6 h-6"></i>Sair</a>
+  </nav>
+
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-[60] bg-jmj text-white px-6 py-3 rounded-xl shadow-lg hidden text-center"></div>
+
+  <script src="js/icons.js"></script>
+  <script src="dados/produtos.js"></script>
+  <script src="js/db.js"></script>
+  <script>
+    let carrinho = [];   // [{id, nome, preco, qtd}]
+    // Lembra a última forma de pagamento usada neste aparelho
+    let pagamento = localStorage.getItem('cjmj_ultimo_pag') || null;
+
+    const $ = id => document.getElementById(id);
+    const totalCarrinho = () => carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
+
+    // ---- Abas ----
+    function abrirTab(nome) {
+      document.querySelectorAll('.tela').forEach(s => s.classList.toggle('hidden', s.id !== nome));
+      document.querySelectorAll('.tab').forEach(b => {
+        const ativo = b.dataset.tab === nome;
+        b.classList.toggle('bg-white', ativo);
+        b.classList.toggle('text-jmj', ativo);
+      });
+      document.querySelectorAll('.tab-m').forEach(b => {
+        const ativo = b.dataset.tab === nome;
+        b.classList.toggle('text-jmj', ativo);
+        b.classList.toggle('text-gray-400', !ativo);
+      });
+      fecharCarrinho();
+      atualizarBarraResumo(nome);
+      if (nome === 'historico') renderHistorico();
+      if (nome === 'pdv') renderProdutos();
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll('.tab, .tab-m').forEach(b => b.onclick = () => abrirTab(b.dataset.tab));
+
+    // ---- Produtos ----
+    function renderProdutos() {
+      const termo = $('busca').value.toLowerCase();
+      const lista = DB.produtos().filter(p => p.ativo !== false && p.nome.toLowerCase().includes(termo));
+      const grade = $('gradeProdutos');
+      grade.innerHTML = lista.length ? lista.map(p => {
+        const qtd = carrinho.find(i => i.id === p.id)?.qtd || 0;
+        return `
+        <div data-id="${p.id}" role="button" tabindex="0"
+          class="prod relative select-none cursor-pointer bg-white rounded-2xl shadow p-4 text-left transition active:scale-95
+                 ${qtd ? 'ring-2 ring-jmj-red' : 'hover:shadow-md hover:ring-2 hover:ring-jmj'}">
+          ${qtd ? `<span class="absolute -top-2 -right-2 bg-jmj-red text-white text-sm font-bold rounded-full min-w-[28px] h-7 px-1.5 flex items-center justify-center shadow">${qtd}</span>` : ''}
+          <p class="font-semibold pr-2">${esc(p.nome)}</p>
+          <div class="flex items-end justify-between mt-1">
+            <p class="text-jmj-red font-bold text-lg">${brl(p.preco)}</p>
+            ${qtd ? `<button data-menos="${p.id}" class="menos w-8 h-8 rounded-lg bg-jmj-light text-jmj flex items-center justify-center" aria-label="Remover um">${icon('minus', 'w-4 h-4')}</button>` : ''}
+          </div>
+        </div>`;
+      }).join('')
+        : '<p class="text-gray-500 col-span-full">Nenhum produto encontrado.</p>';
+      grade.querySelectorAll('.prod').forEach(el => {
+        el.onclick = () => adicionar(el.dataset.id);
+        el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); adicionar(el.dataset.id); } };
+      });
+      grade.querySelectorAll('.menos').forEach(b => b.onclick = e => { e.stopPropagation(); alterarQtd(b.dataset.menos, -1); });
+    }
+    $('busca').oninput = renderProdutos;
+
+    // ---- Carrinho ----
+    function adicionar(id) {
+      const p = DB.produtos().find(x => x.id === id);
+      const item = carrinho.find(i => i.id === id);
+      if (item) item.qtd++;
+      else carrinho.push({ id: p.id, nome: p.nome, preco: Number(p.preco), qtd: 1 });
+      atualizarTudo();
+    }
+    function alterarQtd(id, delta) {
+      const item = carrinho.find(i => i.id === id);
+      if (!item) return;
+      item.qtd += delta;
+      if (item.qtd <= 0) carrinho = carrinho.filter(i => i.id !== id);
+      atualizarTudo();
+    }
+    function atualizarTudo() {
+      renderCarrinho();
+      renderProdutos();
+      atualizarBarraResumo('pdv');
+    }
+    function renderCarrinho() {
+      const ul = $('carrinho');
+      ul.innerHTML = carrinho.length ? carrinho.map(i => `
+        <li class="py-2 flex items-center gap-2">
+          <div class="flex-1 min-w-0">
+            <p class="font-medium leading-tight truncate">${esc(i.nome)}</p>
+            <p class="text-sm text-gray-500">${brl(i.preco)} × ${i.qtd} = <b>${brl(i.preco * i.qtd)}</b></p>
+          </div>
+          <button data-id="${i.id}" data-d="-1" class="qtd w-9 h-9 rounded-lg bg-jmj-light text-jmj flex items-center justify-center">${icon(i.qtd === 1 ? 'trash' : 'minus', 'w-4 h-4')}</button>
+          <span class="w-6 text-center font-semibold">${i.qtd}</span>
+          <button data-id="${i.id}" data-d="1" class="qtd w-9 h-9 rounded-lg bg-jmj-light text-jmj flex items-center justify-center">${icon('plus', 'w-4 h-4')}</button>
+        </li>`).join('')
+        : '<li class="py-6 text-center text-gray-400">Nenhum item</li>';
+      ul.querySelectorAll('.qtd').forEach(b => b.onclick = () => alterarQtd(b.dataset.id, Number(b.dataset.d)));
+      $('total').textContent = brl(totalCarrinho());
+      calcularTroco();
+      atualizarBotao();
+    }
+
+    // ---- Pagamento ----
+    function renderPagamento() {
+      document.querySelectorAll('.pag').forEach(b => {
+        const sel = b.dataset.pag === pagamento;
+        const cor = b.dataset.pag === 'pix' ? 'bg-teal-600 border-teal-600' : 'bg-green-700 border-green-700';
+        b.className = 'pag flex items-center justify-center gap-2 border-2 rounded-xl py-3 font-semibold transition ' +
+          (sel ? `${cor} text-white` : 'border-gray-200 text-gray-600 hover:border-jmj');
+      });
+      $('boxTroco').classList.toggle('hidden', pagamento !== 'dinheiro');
+      calcularTroco();
+      atualizarBotao();
+    }
+    document.querySelectorAll('.pag').forEach(b => b.onclick = () => {
+      pagamento = b.dataset.pag;
+      localStorage.setItem('cjmj_ultimo_pag', pagamento);
+      renderPagamento();
+    });
+
+    function calcularTroco() {
+      const recebido = parseFloat($('recebido').value);
+      const total = totalCarrinho();
+      const el = $('troco');
+      if (!recebido || !total) { el.textContent = ''; return; }
+      const troco = recebido - total;
+      el.textContent = troco >= 0 ? `Troco: ${brl(troco)}` : `Faltam ${brl(-troco)}`;
+      el.classList.toggle('text-jmj-red', troco < 0);
+      el.classList.toggle('text-green-800', troco >= 0);
+    }
+    $('recebido').oninput = calcularTroco;
+
+    function atualizarBotao() {
+      $('finalizar').disabled = !carrinho.length || !pagamento;
+    }
+
+    function limpar() {
+      carrinho = [];
+      $('recebido').value = '';
+      atualizarTudo();
+    }
+    $('limpar').onclick = limpar;
+
+    $('finalizar').onclick = () => {
+      const venda = DB.registrarVenda(carrinho, pagamento);
+      toast(`Venda registrada: ${brl(venda.total)} (${pagLabel(venda.pagamento)})`);
+      limpar();
+      fecharCarrinho();
+    };
+
+    // ---- Gaveta do carrinho (celular) ----
+    function abrirCarrinho() {
+      $('painelCarrinho').classList.remove('translate-y-full');
+      $('fundoCarrinho').classList.remove('hidden');
+    }
+    function fecharCarrinho() {
+      $('painelCarrinho').classList.add('translate-y-full');
+      $('fundoCarrinho').classList.add('hidden');
+    }
+    $('barraResumo').onclick = abrirCarrinho;
+    $('fecharCarrinho').onclick = fecharCarrinho;
+    $('fundoCarrinho').onclick = fecharCarrinho;
+
+    function atualizarBarraResumo(tela) {
+      const qtd = carrinho.reduce((s, i) => s + i.qtd, 0);
+      const telaAtual = tela || (document.getElementById('pdv').classList.contains('hidden') ? 'historico' : 'pdv');
+      $('barraResumo').classList.toggle('hidden', !qtd || telaAtual !== 'pdv');
+      $('resumoQtd').textContent = qtd;
+      $('resumoTotal').textContent = brl(totalCarrinho());
+    }
+
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg; t.classList.remove('hidden');
+      clearTimeout(t._t); t._t = setTimeout(() => t.classList.add('hidden'), 2500);
+    }
+
+    // ---- Histórico ----
+    function renderHistorico() {
+      const vendas = DB.vendas().slice().reverse();
+      const hoje = new Date().toDateString();
+      const doDia = vendas.filter(v => new Date(v.data).toDateString() === hoje);
+      const soma = arr => arr.reduce((s, v) => s + v.total, 0);
+      $('hQtd').textContent = `${doDia.length} · ${brl(soma(doDia))}`;
+      $('hPix').textContent = brl(soma(doDia.filter(v => v.pagamento === 'pix')));
+      $('hDinheiro').textContent = brl(soma(doDia.filter(v => v.pagamento === 'dinheiro')));
+
+      const itens = v => v.itens.map(i => `${i.qtd}× ${esc(i.nome)}`).join(', ');
+      const vazio = '<p class="p-6 text-center text-gray-400">Nenhuma venda ainda</p>';
+
+      $('listaHistorico').innerHTML = vendas.length ? vendas.map(v => `
+        <div class="bg-white rounded-2xl shadow p-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-500">${dataHora(v.data)}</span>
+            ${pagBadge(v.pagamento)}
+          </div>
+          <div class="flex items-end justify-between gap-3">
+            <p class="text-sm">${itens(v)}</p>
+            <p class="font-bold text-jmj whitespace-nowrap">${brl(v.total)}</p>
+          </div>
+        </div>`).join('') : vazio;
+
+      $('tabelaHistorico').innerHTML = vendas.length ? vendas.map(v => `
+        <tr class="hover:bg-jmj-light">
+          <td class="p-3 whitespace-nowrap text-sm">${dataHora(v.data)}</td>
+          <td class="p-3 text-sm">${itens(v)}</td>
+          <td class="p-3">${pagBadge(v.pagamento)}</td>
+          <td class="p-3 text-right font-semibold">${brl(v.total)}</td>
+        </tr>`).join('')
+        : `<tr><td colspan="4">${vazio}</td></tr>`;
+    }
+
+    $('enviarVendas').onclick = () => {
+      if (!DB.vendas().length) { toast('Nenhuma venda para enviar'); return; }
+      const agora = new Date();
+      const nome = `vendas-${agora.toISOString().slice(0, 10)}-${agora.getHours()}h${String(agora.getMinutes()).padStart(2, '0')}.json`;
+      compartilharOuBaixar(nome, DB.exportarVendas(), 'application/json');
+    };
+
+    renderCarrinho();
+    renderPagamento();
+    abrirTab('pdv');
+  </script>
+</body>
+</html>

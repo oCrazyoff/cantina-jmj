@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Admin · cantina-jmj</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/tailwind-config.js"></script>
+  <link rel="icon" href="logo.png">
+  <style>.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }</style>
+</head>
+<body class="min-h-screen bg-jmj-light text-gray-800">
+
+  <!-- LOGIN -->
+  <div id="login" class="min-h-screen flex items-center justify-center p-6 hidden">
+    <form id="formLogin" class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm border-t-8 border-jmj">
+      <img src="logo.png" alt="Instituto JMJ" class="w-32 mx-auto mb-2">
+      <h1 class="text-xl font-bold text-jmj text-center mb-6">Administração</h1>
+      <label class="block text-sm font-medium mb-1">Usuário</label>
+      <div class="relative mb-4">
+        <i data-icon="user" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input id="usuario" class="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-jmj" autocomplete="username" autocapitalize="off" required>
+      </div>
+      <label class="block text-sm font-medium mb-1">Senha</label>
+      <div class="relative mb-2">
+        <i data-icon="lock" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input id="senha" type="password" class="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-jmj" autocomplete="current-password" required>
+      </div>
+      <p id="erroLogin" class="text-jmj-red text-sm h-5 mb-2"></p>
+      <button class="w-full bg-jmj hover:bg-jmj-dark text-white font-semibold py-3 rounded-xl transition">Entrar</button>
+      <a href="index.html" class="block text-center text-sm text-gray-500 mt-4 hover:text-jmj">Voltar</a>
+    </form>
+  </div>
+
+  <!-- PAINEL -->
+  <div id="painel" class="hidden pb-24 md:pb-0">
+    <header class="bg-jmj text-white sticky top-0 z-30">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+        <img src="logo.png" alt="" class="w-10 h-10 bg-white rounded-full p-0.5">
+        <span class="font-bold text-lg">cantina-jmj <span class="font-normal opacity-70">· Admin</span></span>
+        <nav class="ml-auto hidden md:flex gap-1">
+          <button data-tab="dashboard" class="tab flex items-center gap-2 px-4 py-2 rounded-lg font-medium"><i data-icon="dashboard"></i>Dashboard</button>
+          <button data-tab="relatorios" class="tab flex items-center gap-2 px-4 py-2 rounded-lg font-medium"><i data-icon="report"></i>Relatórios</button>
+          <button data-tab="produtos" class="tab flex items-center gap-2 px-4 py-2 rounded-lg font-medium"><i data-icon="box"></i>Produtos</button>
+          <button class="sair flex items-center gap-2 px-3 py-2 opacity-70 hover:opacity-100"><i data-icon="logout"></i>Sair</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4">
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="tela">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+          <div class="bg-white rounded-2xl shadow p-4 border-l-4 border-jmj"><p class="text-sm text-gray-500">Faturamento hoje</p><p id="dHoje" class="text-xl sm:text-2xl font-bold text-jmj"></p></div>
+          <div class="bg-white rounded-2xl shadow p-4 border-l-4 border-jmj"><p class="text-sm text-gray-500">Vendas hoje</p><p id="dQtdHoje" class="text-xl sm:text-2xl font-bold text-jmj"></p></div>
+          <div class="bg-white rounded-2xl shadow p-4 border-l-4 border-jmj-red"><p class="text-sm text-gray-500">Faturamento total</p><p id="dTotal" class="text-xl sm:text-2xl font-bold text-jmj-red"></p></div>
+          <div class="bg-white rounded-2xl shadow p-4 border-l-4 border-jmj-red"><p class="text-sm text-gray-500">Ticket médio</p><p id="dTicket" class="text-xl sm:text-2xl font-bold text-jmj-red"></p></div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow p-4 mb-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div class="flex-1">
+            <p class="font-bold text-jmj">Juntar vendas dos caixas</p>
+            <p class="text-sm text-gray-600">Importe os arquivos que cada caixa enviou em "Enviar vendas". Vendas repetidas são ignoradas.</p>
+          </div>
+          <label class="flex items-center justify-center gap-2 bg-jmj hover:bg-jmj-dark text-white font-semibold px-5 py-3 rounded-xl transition cursor-pointer whitespace-nowrap">
+            <i data-icon="upload"></i>Importar vendas
+            <input type="file" class="importarVendas hidden" accept=".json,application/json" multiple>
+          </label>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-white rounded-2xl shadow p-4">
+            <h2 class="font-bold text-jmj mb-3">Por forma de pagamento (total)</h2>
+            <div id="dPagamentos" class="space-y-3"></div>
+          </div>
+          <div class="bg-white rounded-2xl shadow p-4">
+            <h2 class="font-bold text-jmj mb-3">Produtos mais vendidos</h2>
+            <ol id="dTop" class="space-y-2"></ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- RELATÓRIOS -->
+      <section id="relatorios" class="tela hidden">
+        <div class="bg-white rounded-2xl shadow p-4 mb-4 grid grid-cols-2 md:flex md:flex-wrap gap-3 md:items-end">
+          <div class="col-span-2 md:flex-1 md:min-w-[200px]">
+            <label class="block text-sm font-medium mb-1">Produto</label>
+            <div class="relative">
+              <i data-icon="search" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              <input id="fProduto" type="search" placeholder="Pesquisar produto..." class="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-jmj">
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Pagamento</label>
+            <select id="fPagamento" class="w-full px-3 py-2 rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-jmj">
+              <option value="">Todos</option>
+              <option value="pix">PIX</option>
+              <option value="dinheiro">Dinheiro</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Data</label>
+            <input id="fData" type="date" class="w-full px-3 py-2 rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-jmj">
+          </div>
+          <label class="flex items-center justify-center gap-2 border-2 border-jmj text-jmj hover:bg-jmj hover:text-white font-semibold px-4 py-2 rounded-lg transition cursor-pointer">
+            <i data-icon="upload"></i>Importar
+            <input type="file" class="importarVendas hidden" accept=".json,application/json" multiple>
+          </label>
+          <button id="exportar" class="flex items-center justify-center gap-2 bg-jmj-red hover:bg-jmj-redDark text-white font-semibold px-4 py-2 rounded-lg transition">
+            <i data-icon="download"></i>Exportar CSV
+          </button>
+        </div>
+
+        <div id="resumoFiltro" class="grid grid-cols-3 gap-3 mb-3"></div>
+
+        <div id="listaRelatorio" class="space-y-2 md:hidden"></div>
+        <div class="hidden md:block bg-white rounded-2xl shadow overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-jmj text-white text-sm">
+              <tr><th class="p-3">Data/hora</th><th class="p-3">Produto</th><th class="p-3 text-center">Qtd</th><th class="p-3 text-right">Preço</th><th class="p-3 text-right">Subtotal</th><th class="p-3">Pagamento</th></tr>
+            </thead>
+            <tbody id="tabelaRelatorio" class="divide-y"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PRODUTOS -->
+      <section id="produtos" class="tela hidden">
+       <div class="md:grid md:grid-cols-3 md:items-start gap-4 space-y-4 md:space-y-0">
+        <div class="space-y-4">
+          <form id="formProduto" class="bg-white rounded-2xl shadow p-4">
+            <h2 id="tituloForm" class="font-bold text-jmj text-lg mb-3 flex items-center gap-2"><i data-icon="plus"></i>Novo produto</h2>
+            <input type="hidden" id="pId">
+            <label class="block text-sm font-medium mb-1">Nome</label>
+            <input id="pNome" required class="w-full mb-3 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-jmj">
+            <label class="block text-sm font-medium mb-1">Preço (R$)</label>
+            <input id="pPreco" type="number" inputmode="decimal" step="0.01" min="0" required class="w-full mb-3 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-jmj">
+            <label class="flex items-center gap-2 mb-4 text-sm">
+              <input id="pAtivo" type="checkbox" checked class="w-4 h-4 accent-jmj"> Disponível no caixa
+            </label>
+            <button class="w-full flex items-center justify-center gap-2 bg-jmj hover:bg-jmj-dark text-white font-semibold py-2 rounded-lg transition"><i data-icon="save"></i>Salvar</button>
+            <button type="button" id="cancelarEdicao" class="w-full flex items-center justify-center gap-1 mt-2 py-1 text-sm text-gray-500 hover:text-jmj-red hidden"><i data-icon="x" class="w-4 h-4"></i>Cancelar edição</button>
+          </form>
+
+          <div class="bg-white rounded-2xl shadow p-4 space-y-2">
+            <h2 class="font-bold text-jmj mb-1">Dados</h2>
+            <button type="button" id="baixarProdutos" class="w-full flex items-center justify-center gap-2 border-2 border-jmj text-jmj hover:bg-jmj hover:text-white font-semibold py-2 rounded-lg transition"><i data-icon="download"></i>Baixar produtos.js</button>
+            <p class="text-xs text-gray-500">Substitua <code>dados/produtos.js</code> no GitHub para todos os caixas receberem o catálogo.</p>
+            <button type="button" id="exportarBackup" class="w-full flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-700 hover:border-jmj font-semibold py-2 rounded-lg transition"><i data-icon="download"></i>Exportar backup (JSON)</button>
+            <label class="w-full flex items-center justify-center gap-2 border-2 border-gray-300 text-gray-700 hover:border-jmj font-semibold py-2 rounded-lg transition cursor-pointer">
+              <i data-icon="upload"></i>Importar backup
+              <input type="file" id="importarBackup" accept=".json,application/json" class="hidden">
+            </label>
+          </div>
+        </div>
+
+        <div class="md:col-span-2">
+          <div id="listaProdutos" class="space-y-2 md:hidden"></div>
+          <div class="hidden md:block bg-white rounded-2xl shadow overflow-x-auto h-fit">
+            <table class="w-full text-left">
+              <thead class="bg-jmj text-white text-sm">
+                <tr><th class="p-3">Produto</th><th class="p-3 text-right">Preço</th><th class="p-3 text-center">Status</th><th class="p-3 text-right">Ações</th></tr>
+              </thead>
+              <tbody id="tabelaProdutos" class="divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+       </div>
+      </section>
+    </main>
+
+    <!-- Menu inferior (celular) -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-gray-200 grid grid-cols-4 safe-bottom">
+      <button data-tab="dashboard" class="tab-m flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium"><i data-icon="dashboard" class="w-6 h-6"></i>Dashboard</button>
+      <button data-tab="relatorios" class="tab-m flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium"><i data-icon="report" class="w-6 h-6"></i>Relatórios</button>
+      <button data-tab="produtos" class="tab-m flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium"><i data-icon="box" class="w-6 h-6"></i>Produtos</button>
+      <button class="sair flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium text-gray-500"><i data-icon="logout" class="w-6 h-6"></i>Sair</button>
+    </nav>
+  </div>
+
+  <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-[60] bg-jmj text-white px-6 py-3 rounded-xl shadow-lg hidden text-center"></div>
+
+  <script src="js/icons.js"></script>
+  <script src="dados/produtos.js"></script>
+  <script src="js/db.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+
+    // ---- Login (simples, apenas no navegador) ----
+    const ADMIN_USER = 'admin';
+    const ADMIN_PASS = 'jmj2026';
+
+    function checarSessao() {
+      const logado = sessionStorage.getItem('cjmj_admin') === '1';
+      $('login').classList.toggle('hidden', logado);
+      $('painel').classList.toggle('hidden', !logado);
+      if (logado) abrirTab('dashboard');
+    }
+    $('formLogin').onsubmit = e => {
+      e.preventDefault();
+      if ($('usuario').value.trim().toLowerCase() === ADMIN_USER && $('senha').value === ADMIN_PASS) {
+        sessionStorage.setItem('cjmj_admin', '1');
+        checarSessao();
+      } else {
+        $('erroLogin').textContent = 'Usuário ou senha inválidos';
+      }
+    };
+    document.querySelectorAll('.sair').forEach(b => b.onclick = () => { sessionStorage.removeItem('cjmj_admin'); checarSessao(); });
+
+    function toast(msg) {
+      const t = $('toast');
+      t.textContent = msg; t.classList.remove('hidden');
+      clearTimeout(t._t); t._t = setTimeout(() => t.classList.add('hidden'), 3000);
+    }
+
+    // ---- Abas ----
+    let telaAtual = 'dashboard';
+    function abrirTab(nome) {
+      telaAtual = nome;
+      document.querySelectorAll('.tela').forEach(s => s.classList.toggle('hidden', s.id !== nome));
+      document.querySelectorAll('.tab').forEach(b => {
+        const ativo = b.dataset.tab === nome;
+        b.classList.toggle('bg-white', ativo);
+        b.classList.toggle('text-jmj', ativo);
+      });
+      document.querySelectorAll('.tab-m').forEach(b => {
+        const ativo = b.dataset.tab === nome;
+        b.classList.toggle('text-jmj', ativo);
+        b.classList.toggle('text-gray-400', !ativo);
+      });
+      ({ dashboard: renderDashboard, relatorios: renderRelatorio, produtos: renderProdutos })[nome]();
+      window.scrollTo(0, 0);
+    }
+    document.querySelectorAll('.tab, .tab-m').forEach(b => b.onclick = () => abrirTab(b.dataset.tab));
+
+    // ---- Dashboard ----
+    function renderDashboard() {
+      const vendas = DB.vendas();
+      const hoje = new Date().toDateString();
+      const doDia = vendas.filter(v => new Date(v.data).toDateString() === hoje);
+      const soma = arr => arr.reduce((s, v) => s + v.total, 0);
+      const total = soma(vendas);
+
+      $('dHoje').textContent = brl(soma(doDia));
+      $('dQtdHoje').textContent = doDia.length;
+      $('dTotal').textContent = brl(total);
+      $('dTicket').textContent = brl(vendas.length ? total / vendas.length : 0);
+
+      $('dPagamentos').innerHTML = Object.entries(PAGAMENTOS).map(([chave, cfg]) => {
+        const doTipo = vendas.filter(v => v.pagamento === chave);
+        const valor = soma(doTipo);
+        const pct = total ? Math.round(valor / total * 100) : 0;
+        return `
+          <div>
+            <div class="flex justify-between items-center text-sm mb-1">
+              <span class="font-medium flex items-center gap-1.5">${icon(cfg.icone, 'w-4 h-4')}${cfg.label} <span class="text-gray-400 font-normal">(${doTipo.length})</span></span>
+              <span>${brl(valor)} · ${pct}%</span>
+            </div>
+            <div class="h-3 bg-gray-100 rounded-full overflow-hidden"><div class="h-full ${cfg.barra}" style="width:${pct}%"></div></div>
+          </div>`;
+      }).join('');
+
+      const contagem = {};
+      vendas.forEach(v => v.itens.forEach(i => {
+        contagem[i.nome] ??= { qtd: 0, valor: 0 };
+        contagem[i.nome].qtd += i.qtd;
+        contagem[i.nome].valor += i.qtd * i.preco;
+      }));
+      const top = Object.entries(contagem).sort((a, b) => b[1].qtd - a[1].qtd).slice(0, 5);
+      $('dTop').innerHTML = top.length ? top.map(([nome, d], idx) => `
+        <li class="flex items-center gap-3">
+          <span class="w-7 h-7 rounded-full bg-jmj-light text-jmj font-bold flex items-center justify-center text-sm">${idx + 1}</span>
+          <span class="flex-1">${esc(nome)}</span>
+          <span class="text-sm text-gray-500">${d.qtd} un · ${brl(d.valor)}</span>
+        </li>`).join('')
+        : '<li class="text-gray-400">Nenhuma venda ainda</li>';
+    }
+
+    // ---- Importar vendas dos caixas ----
+    document.querySelectorAll('.importarVendas').forEach(input => input.onchange = async e => {
+      const arquivos = [...e.target.files];
+      let adicionadas = 0, erros = 0;
+      for (const arq of arquivos) {
+        try { adicionadas += DB.mesclarVendas(await arq.text()); }
+        catch { erros++; }
+      }
+      e.target.value = '';
+      toast(`${adicionadas} venda(s) nova(s) importada(s)` + (erros ? ` · ${erros} arquivo(s) inválido(s)` : ''));
+      abrirTab(telaAtual);
+    });
+
+    // ---- Relatórios ----
+    function dataLocal(iso) {
+      const d = new Date(iso);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function linhasFiltradas() {
+      const termo = $('fProduto').value.trim().toLowerCase();
+      const pag = $('fPagamento').value;
+      const data = $('fData').value;
+      const linhas = [];
+      DB.vendas().slice().reverse().forEach(v => {
+        if (pag && v.pagamento !== pag) return;
+        if (data && dataLocal(v.data) !== data) return;
+        v.itens.forEach(i => {
+          if (termo && !i.nome.toLowerCase().includes(termo)) return;
+          linhas.push({ data: v.data, venda: v.id, produto: i.nome, qtd: i.qtd, preco: i.preco, subtotal: i.qtd * i.preco, pagamento: v.pagamento });
+        });
+      });
+      return linhas;
+    }
+    function renderRelatorio() {
+      const linhas = linhasFiltradas();
+      const somaPag = p => linhas.filter(l => !p || l.pagamento === p).reduce((s, l) => s + l.subtotal, 0);
+      $('resumoFiltro').innerHTML = `
+        <div class="bg-white rounded-2xl shadow p-3"><p class="text-xs text-gray-500">Total (${linhas.length})</p><p class="font-bold text-jmj sm:text-xl">${brl(somaPag())}</p></div>
+        <div class="bg-white rounded-2xl shadow p-3"><p class="text-xs text-gray-500 flex items-center gap-1">${icon('pix', 'w-3.5 h-3.5 text-teal-600')}PIX</p><p class="font-bold text-jmj sm:text-xl">${brl(somaPag('pix'))}</p></div>
+        <div class="bg-white rounded-2xl shadow p-3"><p class="text-xs text-gray-500 flex items-center gap-1">${icon('cash', 'w-3.5 h-3.5 text-green-700')}Dinheiro</p><p class="font-bold text-jmj sm:text-xl">${brl(somaPag('dinheiro'))}</p></div>`;
+
+      const vazio = '<p class="p-6 text-center text-gray-400">Nenhum registro encontrado</p>';
+      $('listaRelatorio').innerHTML = linhas.length ? linhas.map(l => `
+        <div class="bg-white rounded-2xl shadow p-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-500">${dataHora(l.data)}</span>${pagBadge(l.pagamento)}
+          </div>
+          <div class="flex items-end justify-between gap-3">
+            <p class="text-sm"><b>${l.qtd}×</b> ${esc(l.produto)} <span class="text-gray-400">(${brl(l.preco)})</span></p>
+            <p class="font-bold text-jmj whitespace-nowrap">${brl(l.subtotal)}</p>
+          </div>
+        </div>`).join('') : vazio;
+
+      $('tabelaRelatorio').innerHTML = linhas.length ? linhas.map(l => `
+        <tr class="hover:bg-jmj-light text-sm">
+          <td class="p-3 whitespace-nowrap">${dataHora(l.data)}</td>
+          <td class="p-3">${esc(l.produto)}</td>
+          <td class="p-3 text-center">${l.qtd}</td>
+          <td class="p-3 text-right">${brl(l.preco)}</td>
+          <td class="p-3 text-right font-semibold">${brl(l.subtotal)}</td>
+          <td class="p-3">${pagBadge(l.pagamento)}</td>
+        </tr>`).join('')
+        : `<tr><td colspan="6">${vazio}</td></tr>`;
+    }
+    $('fProduto').oninput = renderRelatorio;
+    $('fPagamento').onchange = renderRelatorio;
+    $('fData').onchange = renderRelatorio;
+
+    $('exportar').onclick = () => {
+      const linhas = linhasFiltradas();
+      const num = n => n.toFixed(2).replace('.', ',');
+      const cel = s => `"${String(s).replace(/"/g, '""')}"`;
+      const csv = [
+        ['Data/hora', 'Venda', 'Produto', 'Quantidade', 'Preço unitário', 'Subtotal', 'Pagamento'].map(cel).join(';'),
+        ...linhas.map(l => [dataHora(l.data), l.venda, l.produto, l.qtd, num(l.preco), num(l.subtotal), pagLabel(l.pagamento)].map(cel).join(';'))
+      ].join('\r\n');
+      baixarArquivo(`cantina-jmj-relatorio-${$('fData').value || new Date().toISOString().slice(0, 10)}.csv`, '﻿' + csv, 'text/csv;charset=utf-8');
+    };
+
+    // ---- Dados (catálogo e backup) ----
+    $('baixarProdutos').onclick = () =>
+      baixarArquivo('produtos.js', DB.gerarProdutosJs(), 'text/javascript;charset=utf-8');
+    $('exportarBackup').onclick = () =>
+      baixarArquivo(`cantina-jmj-backup-${new Date().toISOString().slice(0, 10)}.json`, DB.exportarBackup(), 'application/json');
+    $('importarBackup').onchange = async e => {
+      const arquivo = e.target.files[0];
+      if (!arquivo) return;
+      if (!confirm('Importar este backup vai substituir os produtos e vendas deste navegador. Continuar?')) { e.target.value = ''; return; }
+      try {
+        DB.importarBackup(await arquivo.text());
+        toast('Backup importado!');
+        renderProdutos();
+      } catch (err) {
+        alert('Não foi possível importar: ' + err.message);
+      }
+      e.target.value = '';
+    };
+
+    // ---- Produtos ----
+    function renderProdutos() {
+      const lista = DB.produtos().slice().sort((a, b) => a.nome.localeCompare(b.nome));
+      const status = p => `<span class="px-2 py-1 rounded-full text-xs font-semibold ${p.ativo !== false ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}">${p.ativo !== false ? 'Ativo' : 'Inativo'}</span>`;
+      const acoes = p => `
+        <button data-id="${p.id}" class="editar p-2 rounded-lg text-jmj hover:bg-jmj-light" title="Editar" aria-label="Editar ${esc(p.nome)}">${icon('pencil')}</button>
+        <button data-id="${p.id}" class="excluir p-2 rounded-lg text-jmj-red hover:bg-red-50" title="Excluir" aria-label="Excluir ${esc(p.nome)}">${icon('trash')}</button>`;
+      const vazio = '<p class="p-6 text-center text-gray-400">Nenhum produto cadastrado</p>';
+
+      $('listaProdutos').innerHTML = lista.length ? lista.map(p => `
+        <div class="bg-white rounded-2xl shadow p-3 flex items-center gap-3">
+          <div class="flex-1 min-w-0">
+            <p class="font-medium truncate">${esc(p.nome)}</p>
+            <p class="text-sm"><span class="font-bold text-jmj-red">${brl(p.preco)}</span> · ${status(p)}</p>
+          </div>
+          <div class="flex">${acoes(p)}</div>
+        </div>`).join('') : vazio;
+
+      $('tabelaProdutos').innerHTML = lista.length ? lista.map(p => `
+        <tr class="hover:bg-jmj-light">
+          <td class="p-3 font-medium">${esc(p.nome)}</td>
+          <td class="p-3 text-right">${brl(p.preco)}</td>
+          <td class="p-3 text-center">${status(p)}</td>
+          <td class="p-3 text-right whitespace-nowrap">${acoes(p)}</td>
+        </tr>`).join('')
+        : `<tr><td colspan="4">${vazio}</td></tr>`;
+
+      document.querySelectorAll('.editar').forEach(b => b.onclick = () => editar(b.dataset.id));
+      document.querySelectorAll('.excluir').forEach(b => b.onclick = () => {
+        const p = DB.produtos().find(x => x.id === b.dataset.id);
+        if (confirm(`Excluir "${p.nome}"?`)) { DB.excluirProduto(p.id); resetForm(); renderProdutos(); }
+      });
+    }
+    function editar(id) {
+      const p = DB.produtos().find(x => x.id === id);
+      $('pId').value = p.id;
+      $('pNome').value = p.nome;
+      $('pPreco').value = p.preco;
+      $('pAtivo').checked = p.ativo !== false;
+      $('tituloForm').innerHTML = icon('pencil') + 'Editar produto';
+      $('cancelarEdicao').classList.remove('hidden');
+      $('formProduto').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      $('pNome').focus({ preventScroll: true });
+    }
+    function resetForm() {
+      $('formProduto').reset();
+      $('pId').value = '';
+      $('tituloForm').innerHTML = icon('plus') + 'Novo produto';
+      $('cancelarEdicao').classList.add('hidden');
+    }
+    $('cancelarEdicao').onclick = resetForm;
+    $('formProduto').onsubmit = e => {
+      e.preventDefault();
+      const editando = !!$('pId').value;
+      DB.salvarProduto({
+        id: $('pId').value || undefined,
+        nome: $('pNome').value.trim(),
+        preco: parseFloat($('pPreco').value),
+        ativo: $('pAtivo').checked
+      });
+      resetForm();
+      renderProdutos();
+      toast(editando ? 'Produto atualizado' : 'Produto cadastrado');
+    };
+
+    checarSessao();
+  </script>
+</body>
+</html>
